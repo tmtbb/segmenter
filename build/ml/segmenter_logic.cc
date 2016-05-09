@@ -71,6 +71,8 @@ Segmenterlogic::~Segmenterlogic() {
 bool Segmenterlogic::Init() {
 	std::string dict_core = "dict_20150526_web2.core";
 	std::string dict_dfa = "dfa_file_qss_yk2.map";
+	LOG_DEBUG2("dict_core%s dict_dfa%s", dict_core.c_str(),
+			dict_dfa.c_str());
 	dict_manager_ = SegmenterManager::GetInstance();
 	dict_manager_->LoadCharCore(dict_core.c_str(), dict_dfa.c_str());
     return true;
@@ -105,14 +107,14 @@ bool Segmenterlogic::OnSegmenterMessage(struct server *srv, const int socket,
         return false;
 
     if (!ptl::PacketProsess::UnpackStream(msg, len, &packet)) {
-        //LOG_ERROR2("UnpackStream Error socket %d", socket);
-        //net::PacketProsess::HexEncode(msg, len);
+        LOG_ERROR2("UnpackStream Error socket %d", socket);
+        ptl::PacketProsess::HexEncode(msg, len);
         return false;
     }
 
     assert(packet);
-    //LOG_MSG("dump packet packet");
-    //net::PacketProsess::DumpPacket(packet);
+    LOG_MSG("dump packet packet");
+    ptl::PacketProsess::DumpPacket(packet);
     switch (packet->operate_code) {
       case WORD_SEGMENTER: {
     	OnSegmentWord(srv,socket,packet);
@@ -202,6 +204,8 @@ bool Segmenterlogic::OnSegmentWord(struct server* srv, int socket,
 		ptl::PacketProsess::ClearWordList((struct PacketHead*)&word_result);
 	}
 
+	//结束
+	send_headmsg(socket, WORD_RESULT_END, 0, 0,0,0);
 	return true;
 }
 }

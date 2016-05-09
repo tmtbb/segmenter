@@ -63,8 +63,8 @@ bool SendComm::SendMessage(int socket, struct PacketHead* packet,
         goto MEMFREE;
     }
 
-   // net::PacketProsess::DumpPacket(
-     //       const_cast<const struct PacketHead*>(packet));
+    ptl::PacketProsess::DumpPacket(
+    		const_cast<const struct PacketHead*>(packet));
     ret = SendFull(socket, reinterpret_cast<char*>(packet_stream),
             packet_stream_length);
     if (ret != packet_stream_length) {

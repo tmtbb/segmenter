@@ -6,6 +6,7 @@
 #include "basic/unzip.h"
 #include "basic/zip.h"
 #include "protocol/data_packet.h"
+#include "logic/logic_comm.h"
 #include "ptl_comm_head.h"
 
 #define DUMPPACKBUF     4096 * 10
@@ -29,8 +30,6 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
     char* data = NULL;
 
     switch (operate_code) {
-      case HEART_PACKET:
-    	break;
       case USER_REGISTER: {
     	struct UserRegister* vUserRegister =
     			(struct UserRegister*)packet_head;
@@ -78,6 +77,13 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
         	 out.WriteData((*it)->word, WORD_SIZE - 1);
         	 out.Write32((*it)->utype);
          }
+         body_stream = const_cast<char*>(out.GetData());
+         break;
+       }
+
+       case HEART_PACKET:
+       case WORD_RESULT_END :{
+         BUILDHEAD(0);
          body_stream = const_cast<char*>(out.GetData());
          break;
        }
@@ -216,10 +222,12 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
     			  - (TOKEN_SIZE - 1);
     	  char* str = new char[str_len];
     	  memcpy(str,in.ReadData(str_len,temp),str_len);
+    	  vSegmenterWord->content.assign(str,str_len);
     	  break;
       }
 
-      case HEART_PACKET : {
+      case HEART_PACKET :
+      case WORD_RESULT_END :{
     	  struct PacketHead* vHead =
                    new struct PacketHead;
     	  *packet_head = (struct PacketHead*)vHead;
@@ -233,11 +241,10 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
     return r;
 }
 
-
 void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
 #if 1
-    int16 packet_length = packet_head->packet_length;
-    int8 is_zip_encrypt = packet_head->is_zip_encrypt;
+	int16 packet_length = packet_head->packet_length;
+	int16 is_zip_encrypt = packet_head->is_zip_encrypt;
     int8 type = packet_head->type;
     int16 operate_code = packet_head->operate_code;
     int16 data_length = packet_head->data_length;
@@ -251,28 +258,62 @@ void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
     int32 j = 0;
 
     switch (operate_code) {
-      case WORD_SEGMENTER : {
-        struct SegmenterWord* vSegmenterWord =
-                (struct SegmenterWord*)packet_head;
-        PRINT_TITLE("struct SegmenterWord Dump Begin");
-        DUMPHEAD();
-        PRINT_INT(vSegmenterWord->uid);
-        PRINT_STRING(vSegmenterWord->token);
-        PRINT_STRING(vSegmenterWord->content.c_str());
-        PRINT_END("struct SegmenterWord Dump End");
-        break;
+      case HEART_PACKET:
+      case WORD_RESULT_END: {
+      	PRINT_TITLE("struct HeartPacket Dump Begin");
+      	DUMPHEAD();
+      	PRINT_END("struct HeartPacket Dump End");
+    	break;
+      }
+      case USER_REGISTER:
+      case USER_LOGIN : {
+    	struct UserRegister* vUserRegister =
+    			(struct UserRegister*)packet_head;
+    	PRINT_TITLE("struct UserRegister Dump Begin");
+    	DUMPHEAD();
+    	PRINT_STRING(vUserRegister->username);
+    	PRINT_STRING(vUserRegister->password);
+    	PRINT_END("struct UserRegister Dump End");
+    	break;
+      }
+      case WORD_SEGMENTER: {
+    	struct SegmenterWord* vSegmenterWord =
+    			(struct SegmenterWord*)packet_head;
+    	PRINT_TITLE("struct SegmenterWord Dump Begin");
+    	DUMPHEAD();
+    	PRINT_INT64(vSegmenterWord->uid);
+    	PRINT_STRING(vSegmenterWord->token);
+    	PRINT_STRING(vSegmenterWord->content.c_str());
+    	PRINT_END("struct SegmenterWord Dump End");
+    	break;
+      }
+      case WORD_RESULT: {
+    	struct WordResult* vWordResult =
+    			(struct WordResult*)packet_head;
+    	PRINT_TITLE("struct AssignmentMultiTask Dump Begin");
+    	DUMPHEAD();
+    	std::list<struct WordUnit*>::iterator it =
+    			vWordResult->list.begin();
+    	for (; it != vWordResult->list.end(); it++) {
+    		PRINT_STRING((*it)->word);
+    		PRINT_INT((*it)->utype);
+    	}
+
+    	break;
       }
 
       default:
         break;
+
     }
+
     if (buf[0] != '\0')
-            LOG_DEBUG2("%s\n", buf);
+             LOG_DEBUG2("%s\n", buf);
+
 #endif
 }
-
 void PacketProsess::HexEncode(const void *bytes, size_t size) {
-/*//  #if defined HEXDUMP
+#if 1
     struct PacketHead* head = (struct PacketHead*)bytes;
     static const char kHexChars[] = "0123456789ABCDEF";
     std::string sret(size*3, '\0');
@@ -285,10 +326,9 @@ void PacketProsess::HexEncode(const void *bytes, size_t size) {
         else
             sret[(i * 3) + 2] = '\n';
     }
-    //LOG_DEBUG2("===start====\nopcode[%d]:\n%s\n====end====\n",
-    //            head->operate_code, sret.c_str());
-//  #endif
- * */
+    LOG_DEBUG2("===start====\nopcode[%d]:\n%s\n====end====\n",
+    		head->operate_code, sret.c_str());
+#endif
 }
 
 void PacketProsess::DeletePacket(const void* packet_stream, int32 len,

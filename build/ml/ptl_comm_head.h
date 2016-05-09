@@ -28,7 +28,8 @@ enum operatorcode {
     USER_LOGIN =  0x3EA,
 
     WORD_SEGMENTER = 0x7D1,
-    WORD_RESULT = 0x7D2
+    WORD_RESULT = 0x7D2,
+    WORD_RESULT_END = 0x7D3
 
 };
 

@@ -22,7 +22,7 @@ CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DPROCESS_WORK
+CPPFLAGS += -isystem -shared -fPIC -D_DEBUG -DUSR_LOG_MSG -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DNET_WORK -DBRY_PTL
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
@@ -95,6 +95,8 @@ segmenter_basic_info.o: ./segmenter_basic_info.cc ./segmenter_basic_info.h
 send_comm.o: ./send_comm.cc ./send_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./send_comm.cc $(INCLUDE_PATHS)	
 	
+
+$(TEST) : 
 
 $(PLUGIN) : segmenter_init.o segmenter_logic.o ptl_packet.o segmenter_basic_info.o send_comm.o\
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a\

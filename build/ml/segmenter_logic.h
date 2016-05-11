@@ -75,6 +75,9 @@ class Segmenterlogic {
     bool OnSegmentWord(struct server* srv, int socket,
             struct PacketHead *packet, const void *msg = NULL,
             int32 len = 0);
+    bool OnSegmentEnd(struct server* srv, int socket,
+    		struct PacketHead *packet, const void *msg = NULL,
+    		int32 len = 0);
  private:
     SegmenterManager*         dict_manager_;
 };

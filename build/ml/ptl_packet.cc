@@ -226,6 +226,29 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
     	  break;
       }
 
+      case WORD_RESULT : {
+    	  struct WordResult* vWordResult =
+    			  new struct WordResult;
+    	  *packet_head = (struct PacketHead*)vWordResult;
+
+    	  FILLHEAD();
+    	  int32 num = data_length / (WORDUNIT_SIZE);
+    	  int32 len = 0;
+    	  int32 i = 0;
+    	  for (; i < num; i++) {
+    		  struct WordUnit* unit = new struct WordUnit;
+    		  int32 temp = 0;
+              memcpy(unit->word, in.ReadData(WORD_SIZE - 1, temp),
+            		  WORD_SIZE - 1);
+              int32 word_len = (temp - 1) < (WORD_SIZE - 1) ?
+                                (temp - 1) : (WORD_SIZE - 1);
+              unit->word[word_len] = '\0';
+              unit->utype = in.Read32();
+              vWordResult->list.push_back(unit);
+    	  }
+    	  break;
+      }
+
       case HEART_PACKET :
       case WORD_RESULT_END :{
     	  struct PacketHead* vHead =
@@ -242,7 +265,7 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
 }
 
 void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
-#if 1
+#if 0
 	int16 packet_length = packet_head->packet_length;
 	int16 is_zip_encrypt = packet_head->is_zip_encrypt;
     int8 type = packet_head->type;

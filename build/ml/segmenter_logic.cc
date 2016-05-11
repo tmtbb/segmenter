@@ -119,6 +119,9 @@ bool Segmenterlogic::OnSegmenterMessage(struct server *srv, const int socket,
       case WORD_SEGMENTER: {
     	OnSegmentWord(srv,socket,packet);
     	break;
+      case WORD_RESULT_END: {
+    	  OnSegmentEnd(srv,socket,packet);
+      }
     }
         default:
             break;
@@ -160,6 +163,15 @@ bool Segmenterlogic::OnTimeout(struct server *srv, char *id,
     return true;
 }
 
+
+bool Segmenterlogic::OnSegmentEnd(struct server* srv, int socket,
+		struct PacketHead *packet, const void *msg,
+		int32 len) {
+
+	send_headmsg(socket, packet->operate_code, packet->type,packet->is_zip_encrypt,packet->reserved,packet->session_id);
+	return true;
+}
+
 bool Segmenterlogic::OnSegmentWord(struct server* srv, int socket,
             struct PacketHead *packet, const void *msg,
             int32 len) {
@@ -170,13 +182,13 @@ bool Segmenterlogic::OnSegmentWord(struct server* srv, int socket,
 	int* type;
 	float* req;
 	uint32 bufsz;
-	int32 base_num = 5;
+	int32 base_num = 40;
 
 	float sc = dict_manager_->GetSegsEx(segmenter_word->content.c_str(),
 			segmenter_word->content.length(), res, type, req, bufsz);
 
 	struct WordResult word_result;
-	MAKE_HEAD(word_result, WORD_RESULT, 0, 0, 0, 0);
+	MAKE_HEAD(word_result, WORD_RESULT, 0, 0, 0, packet->reserved);
 
 	for (uint32 i = 0; i < bufsz; i++) {
 		struct WordUnit* unit = new struct WordUnit;
@@ -205,7 +217,7 @@ bool Segmenterlogic::OnSegmentWord(struct server* srv, int socket,
 	}
 
 	//结束
-	send_headmsg(socket, WORD_RESULT_END, 0, 0,0,0);
+	//send_headmsg(socket, WORD_RESULT_END, 0, 0,0,0);
 	return true;
 }
 }

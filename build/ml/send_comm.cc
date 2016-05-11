@@ -53,6 +53,8 @@ bool SendComm::SendMessage(int socket, struct PacketHead* packet,
     int32_t packet_stream_length = 0;
     int ret = 0;
     bool r1 = false;
+
+    struct PacketHead* packet_test = NULL;
     if (socket <= 0 || packet == NULL)
         return false;
 
@@ -63,8 +65,15 @@ bool SendComm::SendMessage(int socket, struct PacketHead* packet,
         goto MEMFREE;
     }
 
-    ptl::PacketProsess::DumpPacket(
-    		const_cast<const struct PacketHead*>(packet));
+    if (!ptl::PacketProsess::UnpackStream(packet_stream, packet_stream_length,
+    		&packet_test)) {
+        LOG_ERROR2("UnpackStream Error socket %d", socket);
+        ptl::PacketProsess::HexEncode(packet_stream, packet_stream_length);
+        return false;
+    }
+
+   ptl::PacketProsess::DumpPacket(
+    		const_cast<const struct PacketHead*>(packet_test));
     ret = SendFull(socket, reinterpret_cast<char*>(packet_stream),
             packet_stream_length);
     if (ret != packet_stream_length) {

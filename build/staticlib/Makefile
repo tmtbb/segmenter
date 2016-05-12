@@ -14,7 +14,7 @@ TARGET_DIR = ./../lib
 
 #THIRD_PATH = ./../../mylib
 
-FILE_PATHS = ./../../src
+FILE_PATHS = ./../../src/segmenter
 LINK_PATHS = -L./
 
 # Flags passed to the preprocessor.

@@ -10,10 +10,10 @@
 
 # Where to find user code.
 
-LIB_DIR = ../../../svc/library
-LIB_DIR_O = ../../lib
-USER_DIR = ../../pub
-SO_DIR = ../../../svc/kid/bin/plugins
+LIB_DIR = ../../../../svc/library
+LIB_DIR_O = ../../../lib
+PUB_DIR = ../pub
+SO_DIR = ../../../../svc/kid/bin/plugins
 
 THIRD_PATH = $(LIB_DIR)/mylib/public
 
@@ -34,7 +34,8 @@ PLUGIN = $(SO_DIR)/segmentersvc/segmenter.so
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(LIB_DIR)/BasicCore\
 				-I$(LIB_DIR)/mylib/public\
-				-I./../../src\
+				-I./../../../src\
+				-I$(PUB_DIR)\
 				-I$(THIRD_PATH)\
 				-I/usr/local/include\
 				-I/usr/include/mysql\
@@ -86,14 +87,14 @@ segmenter_init.o : ./segmenter_init.cc ./segmenter_init.h
 segmenter_logic.o : ./segmenter_logic.cc ./segmenter_logic.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./segmenter_logic.cc $(INCLUDE_PATHS)
 	
-ptl_packet.o : ./ptl_packet.cc ./ptl_packet.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./ptl_packet.cc $(INCLUDE_PATHS)
+ptl_packet.o : ./$(PUB_DIR)/ptl_packet.cc ./$(PUB_DIR)/ptl_packet.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./$(PUB_DIR)/ptl_packet.cc $(INCLUDE_PATHS)
 
 segmenter_basic_info.o: ./segmenter_basic_info.cc ./segmenter_basic_info.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./segmenter_basic_info.cc $(INCLUDE_PATHS)
 
-send_comm.o: ./send_comm.cc ./send_comm.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./send_comm.cc $(INCLUDE_PATHS)	
+send_comm.o: ./$(PUB_DIR)/send_comm.cc ./$(PUB_DIR)/send_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./$(PUB_DIR)/send_comm.cc $(INCLUDE_PATHS)	
 	
 
 $(TEST) : 

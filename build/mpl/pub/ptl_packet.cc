@@ -61,7 +61,27 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
         body_stream = const_cast<char*>(out.GetData());
         break;
       }
+
+      case ARTICLE_DIGEST_UNIT : {
+    	 struct ArticleDigestUnit* vArticleDigestUnit =
+    			 (struct ArticleDigestUnit*)packet_head;
+    	 BUILDHEAD(ARTICLEDIGESTUNIT_SIZE);
+    	 out.Write64(vArticleDigestUnit->article_identifies);
+    	 out.WriteData(vArticleDigestUnit->article_unit.c_str(),
+    			 vArticleDigestUnit->article_unit.length());
+    	 body_stream = const_cast<char*>(out.GetData());
+   	     break;
+      }
             
+      case ARTICLE_DIGEST_END : {
+    	  struct ArticleDigestEnd* vArticleDigestEnd =
+    			  (struct ArticleDigestEnd*)packet_head;
+    	  BUILDHEAD(ARTICLEDIGESTEND_SIZE);
+    	  out.Write64(vArticleDigestEnd->article_identifies);
+    	  body_stream = const_cast<char*>(out.GetData());
+    	  break;
+      }
+
        case WORD_RESULT: {
          struct WordResult* vWordResult =
         		 (struct WordResult*)packet_head;
@@ -223,6 +243,36 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
     	  char* str = new char[str_len];
     	  memcpy(str,in.ReadData(str_len,temp),str_len);
     	  vSegmenterWord->content.assign(str,str_len);
+    	  if (str) {
+    		  delete [] str;
+    		  str = NULL;
+    	  }
+    	  break;
+      }
+
+      case ARTICLE_DIGEST_UNIT : {
+    	  struct ArticleDigestUnit* vArticleDigestUnit =
+    			  new struct ArticleDigestUnit;
+    	  *packet_head = (struct PacketHead*)vArticleDigestUnit;
+    	  FILLHEAD();
+    	  vArticleDigestUnit->article_identifies = in.Read32();
+    	  int32 str_len = vArticleDigestUnit->data_length - sizeof(int32);
+    	  char* str = new char[str_len];
+    	  memcpy(str, in.ReadData(str_len,temp),str_len);
+    	  vArticleDigestUnit->article_unit.assign(str,str_len);
+    	  if (str) {
+    		  delete [] str;
+    		  str = NULL;
+    	  }
+    	  break;
+      }
+
+      case ARTICLE_DIGEST_END : {
+    	  struct ArticleDigestEnd* vAricleDigestEnd =
+    			  new struct ArticleDigestEnd;
+    	  *packet_head = (struct PacketHead*)vAricleDigestEnd;
+    	  FILLHEAD();
+    	  vAricleDigestEnd->article_identifies = in.Read64();
     	  break;
       }
 
@@ -310,6 +360,27 @@ void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
     	PRINT_END("struct SegmenterWord Dump End");
     	break;
       }
+
+      case ARTICLE_DIGEST_UNIT : {
+    	struct ArticleDigestUnit* vArticleDigestUnit =
+    			(struct ArticleDigestUnit*)packet_head;
+    	PRINT_TITLE("struct ArticleDigestUnit Dump Begin");
+    	DUMPHEAD ();
+    	PRINT_INT32(vArticleDigestUnit->article_identifies);
+    	PRINT_STRING(vArticleDigestUnit->article_unit.c_str());
+    	PRINT_END("struct ArticleDigestUnit Dump End")
+    	break;
+      }
+
+      case ARTICLE_DIGEST_END : {
+    	struct ArticleDigestEnd* vArticleDigestEnd =
+    			(struct ArticleDigestEnd*)packet_head;
+    	PRINT_TITLE("struct ArticleDigestEnd Dump Begin")
+    	PRINT_INT32(vArticleDigestEnd->article_identifies);
+    	PRINT_END("struct ArticleDigestEnd Dump End")
+    	break;
+      }
+
       case WORD_RESULT: {
     	struct WordResult* vWordResult =
     			(struct WordResult*)packet_head;

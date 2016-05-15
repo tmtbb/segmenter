@@ -29,8 +29,10 @@ enum operatorcode {
 
     WORD_SEGMENTER = 0x7D1,
     WORD_RESULT = 0x7D2,
-    WORD_RESULT_END = 0x7D3
+    WORD_RESULT_END = 0x7D3,
 
+    ARTICLE_DIGEST_UNIT = 0xBB9,
+    ARTICLE_DIGEST_END = 0xBBA
 };
 
 //  packet_length 长度为原始数据长度
@@ -85,6 +87,17 @@ struct WordResult : public PacketHead {
     //double                         idf;
 };
 
+//ARTICLE_DIGEST_UNIT
+#define ARTICLEDIGESTUNIT_SIZE (sizeof(int64) + vArticleDigestUnit->article_unit.length())
+struct ArticleDigestUnit : public PacketHead {
+	int32 article_identifies;
+	std::string article_unit;
+};
+
+#define ARTICLEDIGESTEND_SIZE (sizeof(int64))
+struct ArticleDigestEnd : public PacketHead {
+	int32 article_identifies;
+};
 
 
 

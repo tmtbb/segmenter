@@ -169,7 +169,14 @@ bool DigestLogic::OnDigestMessage(struct server *srv, const int socket,
     LOG_MSG("dump packet packet");
     ptl::PacketProsess::DumpPacket(packet);
     switch (packet->operate_code) {
-
+      case ARTICLE_DIGEST_UNIT: {
+    	OnArticleDigestUnit(srv,socket,packet);
+    	break;
+    }
+      case ARTICLE_DIGEST_END : {
+    	  OnArticleDigestEnd(srv,socket,packet);
+    	  break;
+      }
         default:
             break;
     }
@@ -208,6 +215,27 @@ bool DigestLogic::OnTimeout(struct server *srv, char *id,
         break;
     }
     return true;
+}
+
+bool DigestLogic::OnArticleDigestUnit(struct server* srv, int socket,
+            struct PacketHead *packet, const void *msg,
+            int32 len) {
+	struct ArticleDigestUnit* article = (struct ArticleDigestUnit*)(packet);
+	digest_logic::ArticleUnit unit;
+	unit.set_article_id(article->article_identifies);
+	unit.set_content(article->article_unit);
+	digest_logic::DigestCacheEngine::GetDigestCacheManager()->SetDigestInfo(
+			socket, unit);
+	return true;
+}
+
+bool DigestLogic::OnArticleDigestEnd(struct server* srv, int socket,
+                struct PacketHead *packet, const void *msg,
+                int32 len) {
+	struct ArticleDigestEnd* end = (struct ArticleDigestEnd*)(packet);
+	digest_logic::DigestCacheEngine::GetDigestCacheManager()->SendDigest(
+			socket,end->article_identifies);
+	return true;
 }
 
 

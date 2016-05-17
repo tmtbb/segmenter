@@ -56,6 +56,14 @@ class DigestLogic {
 
  private:
     bool Init();
+
+    bool OnArticleDigestUnit(struct server* srv, int socket,
+            struct PacketHead *packet, const void *msg = NULL,
+            int32 len = 0);
+
+    bool OnArticleDigestEnd(struct server* srv, int socket,
+                struct PacketHead *packet, const void *msg = NULL,
+                int32 len = 0);
 };
 
 }  // namespace digest_logic

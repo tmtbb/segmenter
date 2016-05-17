@@ -30,6 +30,15 @@ DigestInfo& DigestInfo::operator =(
 	return (*this);
 }
 
+void DigestInfo::CreatFullText() {
+	data_->full_text_ = "";
+	while (data_->full_text_.size() > 0) {
+		ArticleUnit unit =  data_->list_.front();
+		data_->list_.pop_front();
+		data_->full_text_.append(unit.article_content());
+	}
+}
+
 ArticleUnit::ArticleUnit() {
 	data_ = new Data();
 }

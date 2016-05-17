@@ -11,8 +11,8 @@
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 
-typedef std::map<int32,digest_logic::DigestInfo> DIGESTINFO_MAP;
-typedef std::map<int,DIGESTINFO_MAP> DIGESTINFOS_MAP;
+typedef std::map<int32,digest_logic::DigestInfo> DIGESTINFO_MAP; //id - digestinfo
+typedef std::map<int,DIGESTINFO_MAP> DIGESTINFOS_MAP; //socket - DIGESTINFO
 
 namespace digest_logic {
 
@@ -26,9 +26,13 @@ class DigestCacheManager {
 	DigestCacheManager();
 	virtual ~DigestCacheManager();
 
-	void SetDigestInfo(const int socket,digest_logic::DigestInfo);
+	void SetDigestInfo(const int socket,digest_logic::ArticleUnit& unit);
 
-	void CreateDigest(const int socket,const int32 article_id);
+	void SendDigest(const int socket, const int32 article_id);
+
+ private:
+	void CreateDigest(const int socket,const int32 article_id,
+			 std::string& digest);
 
 
  private:

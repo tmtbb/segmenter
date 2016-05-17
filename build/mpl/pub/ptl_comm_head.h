@@ -32,7 +32,8 @@ enum operatorcode {
     WORD_RESULT_END = 0x7D3,
 
     ARTICLE_DIGEST_UNIT = 0xBB9,
-    ARTICLE_DIGEST_END = 0xBBA
+    ARTICLE_DIGEST_END = 0xBBA,
+    ARTICLE_RESULT_DIGEST = 0xBBB
 };
 
 //  packet_length 长度为原始数据长度
@@ -98,6 +99,14 @@ struct ArticleDigestUnit : public PacketHead {
 struct ArticleDigestEnd : public PacketHead {
 	int32 article_identifies;
 };
+
+//ARTICLE_RESULT_DIGEST
+#define ARICLERESULTDIGEST_SIZE (sizeof(int64) + vArticleResultDigest->digest.length())
+struct ArticleResultDigest: public PacketHead {
+	int32 article_identifies;
+	std::string digest;
+};
+
 
 
 

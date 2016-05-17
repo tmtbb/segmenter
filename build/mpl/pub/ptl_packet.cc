@@ -72,7 +72,17 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
     	 body_stream = const_cast<char*>(out.GetData());
    	     break;
       }
-            
+
+      case ARTICLE_RESULT_DIGEST : {
+    	 struct ArticleResultDigest* vArticleResultDigest =
+    			 (struct ArticleResultDigest*)packet_head;
+    	 BUILDHEAD (ARICLERESULTDIGEST_SIZE);
+    	 out.Write64(vArticleResultDigest->article_identifies);
+    	 out.WriteData(vArticleResultDigest->digest.c_str(),
+    			 vArticleResultDigest->digest.length());
+    	 body_stream = const_cast<char*>(out.GetData());
+    	 break;
+      }
       case ARTICLE_DIGEST_END : {
     	  struct ArticleDigestEnd* vArticleDigestEnd =
     			  (struct ArticleDigestEnd*)packet_head;
@@ -267,12 +277,29 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
     	  break;
       }
 
+      case ARTICLE_RESULT_DIGEST: {
+    	  struct ArticleResultDigest* vArticleResultDigest =
+    			  new struct ArticleResultDigest;
+    	  *packet_head = (struct PacketHead*)vArticleResultDigest;
+    	  FILLHEAD();
+    	  vArticleResultDigest->article_identifies = in.Read32();
+    	  int32 str_len = vArticleResultDigest->data_length - sizeof(int32);
+    	  char* str = new char[str_len];
+    	  memcpy(str, in.ReadData(str_len,temp),str_len);
+    	  vArticleResultDigest->digest.assign(str,str_len);
+    	  if (str) {
+    		  delete [] str;
+    		  str = NULL;
+    	  }
+    	  break;
+      }
+
       case ARTICLE_DIGEST_END : {
     	  struct ArticleDigestEnd* vAricleDigestEnd =
     			  new struct ArticleDigestEnd;
     	  *packet_head = (struct PacketHead*)vAricleDigestEnd;
     	  FILLHEAD();
-    	  vAricleDigestEnd->article_identifies = in.Read64();
+    	  vAricleDigestEnd->article_identifies = in.Read32();
     	  break;
       }
 
@@ -370,6 +397,12 @@ void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
     	PRINT_STRING(vArticleDigestUnit->article_unit.c_str());
     	PRINT_END("struct ArticleDigestUnit Dump End")
     	break;
+      }
+
+      case ARTICLE_RESULT_DIGEST : {
+    	  struct ArticleResultDigest* vArticleResultDigest =
+    			  (struct ArticleResultDigest*)packet_head;
+    	  PRINT_TITLE
       }
 
       case ARTICLE_DIGEST_END : {

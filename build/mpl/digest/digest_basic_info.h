@@ -75,11 +75,17 @@ class DigestInfo {
 		data_->list_.push_back(unit);
 	}
 
+	const int32 id() const {return data_->id_;}
+
+	void CreatFullText();
+	const std::string& FullText() const {return data_->full_text_;}
+
  private:
 	class Data {
 	 public:
 		int32                    id_;
-		std::list<ArticleUnit>  list_;
+		std::string              full_text_;
+		std::list<ArticleUnit>   list_;
 		void AddRef() {__sync_fetch_and_add(&refcount_, 1);}
 		void Release() {__sync_fetch_and_sub(&refcount_, 1);
         	if (!refcount_)delete this;

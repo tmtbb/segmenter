@@ -119,9 +119,9 @@ bool Segmenterlogic::OnSegmenterMessage(struct server *srv, const int socket,
       case WORD_SEGMENTER: {
     	OnSegmentWord(srv,socket,packet);
     	break;
+      }
       case WORD_RESULT_END: {
     	  OnSegmentEnd(srv,socket,packet);
-      }
     }
         default:
             break;

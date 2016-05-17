@@ -16,7 +16,7 @@ from netsvc.network import LRInitialScheduler
 
 def start_process(user, password):
     initial_scheduler = LRInitialScheduler()
-    initial_scheduler.connection("222.73.57.17", 16003, user, password)
+    initial_scheduler.connection("222.73.57.15", 16000, user, password)
     initial_scheduler.start_run()
 
 def main():

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6  
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-  
 #encoding=utf-8
 
@@ -8,9 +8,9 @@ Created on 2016年5月11日
 @author: Administrator
 '''
 
-import packet_processing as ppr 
+import netsvc.packet_processing as ppr
 
-class SegmenterLogic(object):
+class BaseLogic(object):
     '''
     classdocs
     '''
@@ -22,4 +22,5 @@ class SegmenterLogic(object):
         packet_head.unpackhead(data)
         return packet_head
     
-segmenter_logic = SegmenterLogic()
+base_logic = BaseLogic()
+    

@@ -27,12 +27,13 @@ DigestInfo& DigestInfo::operator =(
 	}
 
 	data_ = digest_info.data_;
+	//data_->list_ = digest_info.data_->list_;
 	return (*this);
 }
 
 void DigestInfo::CreatFullText() {
 	data_->full_text_ = "";
-	while (data_->full_text_.size() > 0) {
+	while (data_->list_.size() > 0) {
 		ArticleUnit unit =  data_->list_.front();
 		data_->list_.pop_front();
 		data_->full_text_.append(unit.article_content());

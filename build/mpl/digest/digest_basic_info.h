@@ -82,6 +82,10 @@ class DigestInfo {
 
  private:
 	class Data {
+	  public:
+		Data()
+	  	  :refcount_(1)
+	  	  , id_(0){}
 	 public:
 		int32                    id_;
 		std::string              full_text_;

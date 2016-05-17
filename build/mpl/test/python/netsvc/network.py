@@ -17,10 +17,12 @@ from twisted.internet import reactor, protocol
 from twisted.internet import threads
 
 from base.log import kidlog
-from netsvc.segmenter_logic import segmenter_logic
-from netsvc.packet_processing import PacketHead
-from netsvc.packet_processing import SegmenterWord
+#from netsvc.segmenter_logic import segmenter_logic
+#from netsvc.packet_processing import PacketHead
+#from netsvc.packet_processing import SegmenterWord
 from netsvc.resolve import NetData
+from manage.base_logic import base_logic
+from manage.digest_logic import digest_logic
 
 
 class KIDBaseSchedulerClient(protocol.Protocol):
@@ -42,6 +44,9 @@ class KIDBaseSchedulerClient(protocol.Protocol):
 
     def connectionMade(self):
         kidlog.log().debug("connection success")
+        digest_logic.on_test_digeset(self.transport)
+        #self.transport.write(data)
+        '''
         segmenter  = SegmenterWord()
         segmenter.make_head(0,0,0,2001,0,0)
         segmenter.set_uid(10001)
@@ -60,15 +65,6 @@ class KIDBaseSchedulerClient(protocol.Protocol):
             count = count + 1
             kidlog.log().debug("count %d",count)
         '''
-        self.is_alive = True
-        self.transport.write(self.analy_mgr.Login(6, self.password, self.user))
-        self.analy_mgr.feedback = self.feedback_state
-        self.analy_mgr.transport = self.transport
-        self.heart = threading.Timer(15, self.__heart)
-        self.heart.setDaemon(True)
-        self.heart.setName('heart')
-        self.heart.start()
-        '''
 
     def dataReceived(self, data):
         "As soon as any data is received, write it back."
@@ -77,7 +73,8 @@ class KIDBaseSchedulerClient(protocol.Protocol):
         if result == 0:
             return
         
-        packet_head = segmenter_logic.UnpackHead(pack_stream)
+        #packet_head = segmenter_logic.UnpackHead(pack_stream)
+        packet_head = base_logic.UnpackHead(pack_stream)
         kidlog.log().debug("operate_code : %d reserved %d",packet_head.operate_code,packet_head.reserved);
         if(int(packet_head.packet_length) - int(packet_head.packet_head_length())
            <> int(packet_head.data_length)):
@@ -88,6 +85,9 @@ class KIDBaseSchedulerClient(protocol.Protocol):
 #             kidlog.log().error("packet_length less packet head %d",
 #                                int(packet_head.packet_length))
             return
+        
+        if packet_head.operate_code == 3003:
+            digest_logic.on_result_digest(data)
         '''
         if packet_head.operate_code == 100:#心跳包回复
             self.transport.write(pack_stream)

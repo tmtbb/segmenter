@@ -1,6 +1,7 @@
 #!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
 #encoding=utf-8
+from _ast import Pass
 
 '''
 Created on 2015年9月29日
@@ -131,6 +132,84 @@ class PacketHead(object):
         self.reserved = struct.unpack_from('=hbbhhhiqi', packet_stream)
 
 
+
+class ResultDigest(PacketHead):
+    '''
+    reuslt digest
+    '''
+    def __init__(self):
+        PacketHead.__init__(self)
+        self.id = 0
+        self.digest = ""
+        
+    def unpacketstream(self,data):
+        self.data_length = struct.unpack_from('=h',data,8)
+        str_format = '=i%ds' % self.data_length
+        self.id,self.digest = struct.unpack_from(str_format,data,16)
+        print self.id
+        
+        
+        
+class ArticleEnd(PacketHead):
+    '''
+    article unit
+    '''
+    def __init__(self):
+        PacketHead.__init__(self)
+    
+    def set_id(self,id):
+        self.id = id
+        
+    def packet_body_length(self):
+        return 4
+    
+    def bodystream(self):
+        str_format = '=i'
+        self.body = struct.pack(str_format,self.id)
+    
+    def packetstream(self):
+        '''
+        pakcet stream
+        '''
+        self.bodystream()
+        self.set_packet_length(self.packet_head_length() + self.packet_body_length())
+        self.set_data_length(self.packet_body_length())
+        self.headstream()
+        return self.head + self.body
+            
+        
+class ArticleUnit(PacketHead):
+    '''
+    article unit
+    '''
+    def __init__(self):
+        PacketHead.__init__(self)
+        self.id = 0
+        self.article = ""
+    
+    def set_id(self,id):
+        self.id = id
+        
+    def set_article(self,article):
+        self.article = article
+        
+    def packet_body_length(self):
+        return 4 + len(str(self.article))
+    
+    def bodystream(self):
+        str_format = '=i%ds' % (len(str(self.article)))
+        self.body = struct.pack(str_format,self.id,self.article)
+    
+    def packetstream(self):
+        '''
+        pakcet stream
+        '''
+        self.bodystream()
+        self.set_packet_length(self.packet_head_length() + self.packet_body_length())
+        self.set_data_length(self.packet_body_length())
+        self.headstream()
+        return self.head + self.body
+        
 class SegmenterWord(PacketHead):
     '''
     segmenter word
@@ -151,23 +230,17 @@ class SegmenterWord(PacketHead):
         self.content = content
         
     def packet_body_length(self):
-        '''
-        return packet len
-        '''
         
         return 40+len(str(self.content))
         
     def bodystream(self):
-        '''
-        body stream
-        '''
         str_formart = '=q32s%ds' %(len(str(self.content)))
         self.body = struct.pack(str_formart,
                                 self.uid,
                                 self.token,
                                 self.content)
         
-    def packestream(self):
+    def packetstream(self):
         '''
         pakcet stream
         '''
@@ -177,321 +250,3 @@ class SegmenterWord(PacketHead):
         self.headstream()
         return self.head + self.body
     
-class AnalyticalReg(PacketHead):
-    '''
-    analycal reg
-    '''
-    def __init__(self):
-        PacketHead.__init__(self)
-        self.level = 0
-        self.password = ""
-        self.mac = ""
-
-    def set_level(self, level):
-        '''
-        set level
-        '''
-        self.level = level
-
-    def set_password(self, password):
-        '''
-        set password
-        '''
-        self.password = password
-
-    def set_mac(self, mac):
-        '''
-        set mac
-        '''
-        self.mac = mac
-
-    def bodystream(self):
-        '''
-        body stream
-        '''
-        self.body = struct.pack('=h8s16s',
-                                self.level,
-                                self.password,
-                                self.mac)
-
-    def packet_body_length(self):
-        '''
-        packet body length
-        '''
-        return 2 + 8 + 16
-
-    def packestream(self):
-        '''
-        pakcet stream
-        '''
-        self.bodystream()
-        self.set_packet_length(self.packet_head_length() + self.packet_body_length())
-        self.set_data_length(self.packet_body_length())
-        self.headstream()
-        return self.head + self.body
-
-class ElementAnaly(object):
-    '''
-    element analy
-    '''
-    def __init__(self):
-        self.analysis_id = 0
-        self.task_id = 0
-        self.attr_id = 0
-        self.type = 0 # 1:habse 3:ftp
-        self.depth = 0
-        self.cur_depth = 0
-        self.name = ""
-        self.key = ""
-
-    def set_depth(self, depth):
-        self.depth = depth
-
-    def set_cur_depth(self, cur_depth):
-        self.cur_depth = cur_depth
-
-    def set_name(self, name):
-        '''
-        set name
-        '''
-        self.name = name
-
-    def set_key(self, key):
-        '''
-        set key
-        '''
-        self.key = key
-
-    def set_analysis_id(self, analysis_id):
-        '''
-        set analysis id
-        '''
-        self.analysis_id = analysis_id
-
-    def set_task_id(self, task_id):
-        '''
-        set task id
-        '''
-        self.task_id = task_id
-
-    def set_attr_id(self, attr_id):
-        '''
-        set attr id
-        '''
-        self.attr_id = attr_id
-
-    def set_type(self, _type):
-        self.type = _type
-
-    def get_depth(self):
-        return self.depth
-
-    def get_cur_depth(self):
-        return self.cur_depth
-
-    def get_name(self):
-        '''
-        get name
-        '''
-        return self.name
-
-    def get_key(self):
-        '''
-        get key
-        '''
-        return self.key
-
-    def get_analysis_id(self):
-        '''
-        get analysis id
-        '''
-        return self.analysis_id
-
-    def get_task_id(self):
-        '''
-        get task id
-        '''
-        return self.task_id
-
-    def get_attr_id(self):
-        '''
-        get attr id
-        '''
-        return self.attr_id
-
-    def get_type(self):
-        return self.type
-
-    @classmethod
-    def packet_len(cls):
-        '''
-        return packet len
-        '''
-        return struct.calcsize('=qqiBBB32s32s')
-
-class AnalyticalInfo(PacketHead):
-    '''
-    analytical info
-    '''
-    def __init__(self):
-        PacketHead.__init__(self)
-        self.id = 0
-        self.analytical = []
-
-    def getanalylist(self):
-        '''
-        get analy list
-        '''
-        return self.analytical
-
-    def unpackstream(self, data):
-        '''
-        unpack stream
-        '''
-        self.unpackhead(data)
-        i = 0
-        n = (self.data_length) / ElementAnaly.packet_len()
-        while n > 0:
-            element = ElementAnaly()
-            analysis_id,\
-            task_id,\
-            attr_id,\
-            storage_type,\
-            depth,\
-            cur_depth,\
-            name,\
-            key = struct.unpack_from('=qqiBBB32s32s',
-                                     data,
-                                     26 + i * ElementAnaly.packet_len())
-            n = n -1
-            i = i + 1
-            element.set_analysis_id(analysis_id)
-            element.set_task_id(task_id)
-            element.set_attr_id(attr_id)
-            element.set_type(storage_type)
-            element.set_name(name.rstrip('\x00'))
-            element.set_key(key.rstrip('\x00'))
-            element.set_depth(depth)
-            element.set_cur_depth(cur_depth)
-            self.analytical.append(element)
-
-class AnalyticalState(PacketHead):
-    '''
-    analytical state
-    '''
-    def __init__(self):
-        PacketHead.__init__(self)
-        self.analytical_id = 0
-        self.state = 0
-
-    def set_analytical_id(self, analytical_id):
-        '''
-        set analytical id
-        '''
-        self.analytical_id = analytical_id
-
-    def set_state(self, state):
-        '''
-        set state
-        '''
-        self.state = state
-
-    def get_analytical_id(self):
-        '''
-        get analytical id
-        '''
-        return self.analytical_id
-
-    def get_state(self):
-        '''
-        get state
-        '''
-        return self.state
-
-    def bodystream(self):
-        '''
-        body stream
-        '''
-        self.body = struct.pack('=qB', self.analytical_id, self.state)
-
-    def packet_body_length(self):
-        '''
-        packet body length
-        '''
-        return 8 + 1
-
-    def packestream(self):
-        '''
-        pack stream
-        '''
-        self.bodystream()
-        self.set_packet_length(self.packet_head_length() + self.packet_body_length())
-        self.set_data_length(self.packet_body_length())
-        self.headstream()
-        return self.head + self.body
-
-
-class AnalyzedURLInfo(object):
-    '''
-    analytical state
-    '''
-    length = struct.calcsize('QQBBB256s')
-    
-    def __init__(self):
-        self.task_id = 0
-        self.attr_id = 0
-        self.depth = 0
-        self.cur_depth = 0
-        self.method = 0
-        self.url = ''
-
-    def bodystream(self):
-        '''
-        body stream
-        '''
-        self.body = struct.pack('=QQBBB256s',
-                                self.task_id,
-                                self.attr_id,
-                                self.depth,
-                                self.cur_depth,
-                                self.method,
-                                str(self.url))
-
-    def packet_body_length(self):
-        '''
-        packet body length
-        '''
-        return struct.calcsize('QQBBB256s')
-
-    def packestream(self):
-        '''
-        pack stream
-        '''
-        self.bodystream()
-        return self.body
-
-class AnalyzedURLs(PacketHead):
-
-    def __init__(self):
-        PacketHead.__init__(self)
-        self.make_head(0, 0, 0, 1033, 0, 0)
-        self.manage_id = 0
-        self.token = ''
-        self.url_infos = []
-
-    def packestream(self):
-        '''
-        unpack stream
-        '''
-        infos_data = ''
-        for info in self.url_infos:
-            infos_data += info.packestream()
-        self.body = struct.pack('=I32s%ds' % len(infos_data),
-                                self.manage_id,
-                                self.token,
-                                infos_data)
-        body_len = len(self.body)
-        self.set_packet_length(self.packet_head_length() + body_len)
-        self.set_data_length(body_len)
-        self.headstream()
-        return self.head + self.body

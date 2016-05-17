@@ -29,6 +29,18 @@ DigestCacheManager::~DigestCacheManager() {
 void DigestCacheManager::Init() {
 	InitThreadrw(&lock_);
 	InitPython();
+	TestDigest();
+}
+
+void DigestCacheManager::TestDigest() {
+	std::string digest_info = "上交所在2012年鼓励上市公司每年的现金分红比例不少于30%，但随着中国经济的收缩和融资成本的上升，很多上市公司的现金流愈趋紧张，敢于大比例分红的企业屈指可数，不过，汽车板块无疑是个例外。截至5月12日，从各大车企发布的年度财务报告来看，虽然2015年我国汽车市场增幅比上年同期有所减缓，但九成上市车企净利润均实现不同程度的涨 幅，排名前三位的车企为上汽集团、长安汽车以及长城汽车，净利润额分别为296.51亿元、99.53亿元和80.4亿元。";
+	PyObject* pArgs = PyTuple_New(1);
+	LOG_MSG2("[full text]: %s",digest_info.c_str());
+	PyTuple_SetItem(pArgs, 0, Py_BuildValue("s",digest_info.c_str()));
+	PyObject* result = PyObject_CallObject(py_analyzer_,pArgs);
+	if (result == NULL)
+		return;
+	std::string digest = PyString_AsString(result);
 }
 
 bool DigestCacheManager::InitPython() {
@@ -127,13 +139,12 @@ void DigestCacheManager::CreateDigest(const int socket,
 
 	digest_info.CreatFullText();
 	PyObject* pArgs = PyTuple_New(1);
-	PyTuple_SetItem(pArgs, 0, Py_BuildValue("s",digest_info.FullText()));
+	LOG_MSG2("[full text]: %s",digest_info.FullText().c_str());
+	PyTuple_SetItem(pArgs, 0, Py_BuildValue("s",digest_info.FullText().c_str()));
 	PyObject* result = PyObject_CallObject(py_analyzer_,pArgs);
 	if (result == NULL)
 		return;
 	digest = PyString_AsString(result);
-
-
 }
 
 }

@@ -34,6 +34,8 @@ class DigestCacheManager {
 	void CreateDigest(const int socket,const int32 article_id,
 			 std::string& digest);
 
+	void TestDigest();
+
 
  private:
 	void Init();

@@ -11,7 +11,6 @@ int32 SendComm::SendFull(int socket, const char *buffer,
 	//if(NULL == SendUtils::socket_lock_)
 		//InitThreadrw(&SendUtils::socket_lock_);
 	//base_logic::WLockGd lk(SendUtils::socket_lock_);
-	//net::PacketProsess::HexEncode(buffer, nbytes);
     ssize_t amt = 0;
     ssize_t total = 0;
     const char *buf = buffer;
@@ -76,6 +75,7 @@ bool SendComm::SendMessage(int socket, struct PacketHead* packet,
     		const_cast<const struct PacketHead*>(packet_test));
     ret = SendFull(socket, reinterpret_cast<char*>(packet_stream),
             packet_stream_length);
+    ptl::PacketProsess::HexEncode(packet_stream, packet_stream_length);
     if (ret != packet_stream_length) {
         //LOG_ERROR2("Sent msg failed in %s:%d", file, line);
         r = false;

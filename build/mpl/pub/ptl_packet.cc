@@ -66,7 +66,7 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
     	 struct ArticleDigestUnit* vArticleDigestUnit =
     			 (struct ArticleDigestUnit*)packet_head;
     	 BUILDHEAD(ARTICLEDIGESTUNIT_SIZE);
-    	 out.Write64(vArticleDigestUnit->article_identifies);
+    	 out.Write32(vArticleDigestUnit->article_identifies);
     	 out.WriteData(vArticleDigestUnit->article_unit.c_str(),
     			 vArticleDigestUnit->article_unit.length());
     	 body_stream = const_cast<char*>(out.GetData());
@@ -77,7 +77,7 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
     	 struct ArticleResultDigest* vArticleResultDigest =
     			 (struct ArticleResultDigest*)packet_head;
     	 BUILDHEAD (ARICLERESULTDIGEST_SIZE);
-    	 out.Write64(vArticleResultDigest->article_identifies);
+    	 out.Write32(vArticleResultDigest->article_identifies);
     	 out.WriteData(vArticleResultDigest->digest.c_str(),
     			 vArticleResultDigest->digest.length());
     	 body_stream = const_cast<char*>(out.GetData());
@@ -87,7 +87,7 @@ bool PacketProsess::PacketStream(const PacketHead* packet_head,
     	  struct ArticleDigestEnd* vArticleDigestEnd =
     			  (struct ArticleDigestEnd*)packet_head;
     	  BUILDHEAD(ARTICLEDIGESTEND_SIZE);
-    	  out.Write64(vArticleDigestEnd->article_identifies);
+    	  out.Write32(vArticleDigestEnd->article_identifies);
     	  body_stream = const_cast<char*>(out.GetData());
     	  break;
       }
@@ -342,7 +342,7 @@ bool PacketProsess::UnpackStream(const void* packet_stream, int32 len,
 }
 
 void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
-#if 0
+#if 1
 	int16 packet_length = packet_head->packet_length;
 	int16 is_zip_encrypt = packet_head->is_zip_encrypt;
     int8 type = packet_head->type;
@@ -393,24 +393,30 @@ void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
     			(struct ArticleDigestUnit*)packet_head;
     	PRINT_TITLE("struct ArticleDigestUnit Dump Begin");
     	DUMPHEAD ();
-    	PRINT_INT32(vArticleDigestUnit->article_identifies);
+    	PRINT_INT(vArticleDigestUnit->article_identifies);
     	PRINT_STRING(vArticleDigestUnit->article_unit.c_str());
-    	PRINT_END("struct ArticleDigestUnit Dump End")
+    	PRINT_END("struct ArticleDigestUnit Dump End");
     	break;
       }
 
       case ARTICLE_RESULT_DIGEST : {
     	  struct ArticleResultDigest* vArticleResultDigest =
     			  (struct ArticleResultDigest*)packet_head;
-    	  PRINT_TITLE
+    	  PRINT_TITLE("struct ArticleResultDigest Dump Begin");
+    	  DUMPHEAD();
+    	  PRINT_INT(vArticleResultDigest->article_identifies);
+    	  PRINT_STRING(vArticleResultDigest->digest.c_str());
+    	  PRINT_END("struct ArticleResultDigest Dump End");
+    	  break;
       }
 
       case ARTICLE_DIGEST_END : {
     	struct ArticleDigestEnd* vArticleDigestEnd =
     			(struct ArticleDigestEnd*)packet_head;
-    	PRINT_TITLE("struct ArticleDigestEnd Dump Begin")
-    	PRINT_INT32(vArticleDigestEnd->article_identifies);
-    	PRINT_END("struct ArticleDigestEnd Dump End")
+    	PRINT_TITLE("struct ArticleDigestEnd Dump Begin");
+    	DUMPHEAD();
+    	PRINT_INT(vArticleDigestEnd->article_identifies);
+    	PRINT_END("struct ArticleDigestEnd Dump End");
     	break;
       }
 
@@ -435,7 +441,7 @@ void PacketProsess::DumpPacket(const struct PacketHead* packet_head) {
     }
 
     if (buf[0] != '\0')
-             LOG_DEBUG2("%s\n", buf);
+             LOG_MSG2("%s\n", buf);
 
 #endif
 }
@@ -453,7 +459,7 @@ void PacketProsess::HexEncode(const void *bytes, size_t size) {
         else
             sret[(i * 3) + 2] = '\n';
     }
-    LOG_DEBUG2("===start====\nopcode[%d]:\n%s\n====end====\n",
+    LOG_MSG2("===start====\nopcode[%d]:\n%s\n====end====\n",
     		head->operate_code, sret.c_str());
 #endif
 }

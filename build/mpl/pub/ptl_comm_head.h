@@ -89,19 +89,19 @@ struct WordResult : public PacketHead {
 };
 
 //ARTICLE_DIGEST_UNIT
-#define ARTICLEDIGESTUNIT_SIZE (sizeof(int64) + vArticleDigestUnit->article_unit.length())
+#define ARTICLEDIGESTUNIT_SIZE (sizeof(int32) + vArticleDigestUnit->article_unit.length())
 struct ArticleDigestUnit : public PacketHead {
 	int32 article_identifies;
 	std::string article_unit;
 };
 
-#define ARTICLEDIGESTEND_SIZE (sizeof(int64))
+#define ARTICLEDIGESTEND_SIZE (sizeof(int32))
 struct ArticleDigestEnd : public PacketHead {
 	int32 article_identifies;
 };
 
 //ARTICLE_RESULT_DIGEST
-#define ARICLERESULTDIGEST_SIZE (sizeof(int64) + vArticleResultDigest->digest.length())
+#define ARICLERESULTDIGEST_SIZE (sizeof(int32) + vArticleResultDigest->digest.length())
 struct ArticleResultDigest: public PacketHead {
 	int32 article_identifies;
 	std::string digest;

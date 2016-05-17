@@ -29,6 +29,8 @@ DigestLogic::~DigestLogic() {
 }
 
 bool DigestLogic::Init() {
+	digest_logic::DigestCacheEngine::GetDigestCacheEngine();
+	digest_logic::DigestCacheEngine::GetDigestCacheManager();
     return true;
 }
 

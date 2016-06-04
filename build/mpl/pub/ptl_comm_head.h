@@ -88,7 +88,7 @@ struct WordResult : public PacketHead {
     //double                         idf;
 };
 
-//ARTICLE_DIGEST_UNIT
+//ARTICLE_DIGEST_UNIT 0xBB9
 #define ARTICLEDIGESTUNIT_SIZE (sizeof(int32) + vArticleDigestUnit->article_unit.length())
 struct ArticleDigestUnit : public PacketHead {
 	int32 article_identifies;

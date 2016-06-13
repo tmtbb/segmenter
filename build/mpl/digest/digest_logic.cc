@@ -31,6 +31,7 @@ DigestLogic::~DigestLogic() {
 bool DigestLogic::Init() {
 	digest_logic::DigestCacheEngine::GetDigestCacheEngine();
 	digest_logic::DigestCacheEngine::GetDigestCacheManager();
+	LOG_ERROR("ERROR LOG TEST");
     return true;
 }
 
@@ -168,8 +169,8 @@ bool DigestLogic::OnDigestMessage(struct server *srv, const int socket,
     }
 
     assert(packet);
-    LOG_MSG("dump packet packet");
-    ptl::PacketProsess::DumpPacket(packet);
+    //LOG_MSG("dump packet packet");
+    //ptl::PacketProsess::DumpPacket(packet);
     switch (packet->operate_code) {
       case ARTICLE_DIGEST_UNIT: {
     	OnArticleDigestUnit(srv,socket,packet);

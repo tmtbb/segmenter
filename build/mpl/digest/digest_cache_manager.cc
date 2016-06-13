@@ -84,6 +84,7 @@ bool DigestCacheManager::PrintDict(PyObject* obj) {
 
 void DigestCacheManager::SetDigestInfo(const int socket,
 		digest_logic::ArticleUnit& unit) {
+	base_logic::WLockGd lk(lock_);
 	DIGESTINFOS_MAP::iterator it =
 			digest_cache_->digest_infos_map_.find(socket);
 	if (it == digest_cache_->digest_infos_map_.end()) {
@@ -114,8 +115,11 @@ void DigestCacheManager::SetDigestInfo(const int socket,
 void DigestCacheManager::SendDigest(const int socket, const int32 article_id) {
 	std::string digest;
 	CreateDigest(socket,article_id,digest);
-	if(digest.empty())
-		return;
+	if(digest.empty()){
+		LOG_ERROR2("digest null article_id %d",article_id);
+		digest = "具体查看内容详情";
+		//return;
+	}
 	struct ArticleResultDigest digest_result;
 	MAKE_HEAD(digest_result, ARTICLE_RESULT_DIGEST, 0, 0, 0,0);
 	digest_result.article_identifies = article_id;
@@ -125,21 +129,29 @@ void DigestCacheManager::SendDigest(const int socket, const int32 article_id) {
 
 void DigestCacheManager::CreateDigest(const int socket,
 		const int32 article_id, std::string& digest) {
+	base_logic::WLockGd lk(lock_);
 	DIGESTINFOS_MAP::iterator it =
 			digest_cache_->digest_infos_map_.find(socket);
-	if (it == digest_cache_->digest_infos_map_.end())
+	if (it == digest_cache_->digest_infos_map_.end()) {
+		LOG_ERROR2(" socket error not article %d",socket);
 		return;
+	}
 
 
 	DIGESTINFO_MAP info_map = it->second;
 	DIGESTINFO_MAP::iterator itr = info_map.find(article_id);
-	if (itr == info_map.end())
+	if (itr == info_map.end()) {
+		LOG_ERROR2(" article_id error not article %d",article_id);
 		return;
+	}
 	digest_logic::DigestInfo digest_info = itr->second;
+
+	//删除节点值
+	info_map.erase(itr);
 
 	digest_info.CreatFullText();
 	PyObject* pArgs = PyTuple_New(1);
-	LOG_MSG2("[full text]: %s",digest_info.FullText().c_str());
+	//LOG_MSG2("[full text]: %s",digest_info.FullText().c_str());
 	PyTuple_SetItem(pArgs, 0, Py_BuildValue("s",digest_info.FullText().c_str()));
 	PyObject* result = PyObject_CallObject(py_analyzer_,pArgs);
 	if (result == NULL)

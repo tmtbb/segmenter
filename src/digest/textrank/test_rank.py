@@ -35,9 +35,10 @@ if __name__ == '__main__':
     print(rank.Analyzer(text))
     '''
     
-    text = codecs.open('./01.txt', 'r', 'utf-8').read()
+    text = codecs.open('./03.txt', 'r', 'utf-8').read()
     tr4s = TextRank4Sentence()
     print()
+    print(len(text))
     tr4s.analyze(text=text, lower=True, source = 'all_filters')
     print('digest')
     for item in tr4s.get_key_sentences(num = 4):

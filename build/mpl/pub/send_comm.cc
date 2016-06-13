@@ -59,23 +59,23 @@ bool SendComm::SendMessage(int socket, struct PacketHead* packet,
 
     if (ptl::PacketProsess::PacketStream(packet, &packet_stream,
             &packet_stream_length) == false) {
-        //LOG_ERROR2("Call PackStream failed in %s:%d", file, line);
+        LOG_ERROR2("Call PackStream failed in %s:%d", file, line);
         r = false;
         goto MEMFREE;
     }
 
-    if (!ptl::PacketProsess::UnpackStream(packet_stream, packet_stream_length,
+    /* if (!ptl::PacketProsess::UnpackStream(packet_stream, packet_stream_length,
     		&packet_test)) {
         LOG_ERROR2("UnpackStream Error socket %d", socket);
         ptl::PacketProsess::HexEncode(packet_stream, packet_stream_length);
         return false;
     }
 
-   ptl::PacketProsess::DumpPacket(
-    		const_cast<const struct PacketHead*>(packet_test));
+    ptl::PacketProsess::DumpPacket(
+    		const_cast<const struct PacketHead*>(packet_test));*/
     ret = SendFull(socket, reinterpret_cast<char*>(packet_stream),
             packet_stream_length);
-    ptl::PacketProsess::HexEncode(packet_stream, packet_stream_length);
+   /* ptl::PacketProsess::HexEncode(packet_stream, packet_stream_length);*/
     if (ret != packet_stream_length) {
         //LOG_ERROR2("Sent msg failed in %s:%d", file, line);
         r = false;
